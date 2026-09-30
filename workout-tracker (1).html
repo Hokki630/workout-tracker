@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>4-Day Workout</title>
+<meta name="theme-color" content="#1A1F2B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231A1F2B'/%3E%3Ccircle cx='90' cy='90' r='52' fill='none' stroke='%23fff' stroke-width='14'/%3E%3Ccircle cx='90' cy='90' r='16' fill='%232B4EFF'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#E6E9EE; --surface:#fff; --ink:#1A1F2B; --muted:#5B6474; --line:#D3D8E0;
+    --accent:#2B4EFF; --accent-soft:#E3E8FF; --done:#16875C; --done-soft:#DDF3E9;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-variant-numeric:tabular-nums;
+    padding:0 0 calc(110px + env(safe-area-inset-bottom));
+    line-height:1.4;
+  }
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+  header{
+    position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;
+    padding:calc(10px + env(safe-area-inset-top)) 14px 0;
+  }
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .tab{
+    padding:10px 4px 12px;border-radius:10px 10px 0 0;text-align:center;
+    color:#AEB6C6;font-weight:700;font-size:15px;
+  }
+  .tab small{display:block;font-weight:500;font-size:12px;margin-top:1px}
+  .tab[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+
+  main{padding:16px 14px 0;max-width:640px;margin:0 auto}
+  .hero h1{font-size:28px;line-height:1.1;margin:4px 0 6px;letter-spacing:-.02em}
+  .hero p{margin:0 0 12px;color:var(--muted);font-size:15px}
+  .progress{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:var(--done);transition:width .25s}
+  .progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:6px 0 16px}
+
+  details.warm{background:var(--surface);border-radius:14px;padding:0;margin-bottom:14px}
+  details.warm summary{padding:14px 16px;font-weight:700;cursor:pointer;list-style:none}
+  details.warm summary::-webkit-details-marker{display:none}
+  details.warm ul{margin:0;padding:0 16px 14px 34px;color:var(--muted);font-size:15px}
+
+  .ex{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:14px}
+  .ex.complete{background:var(--done-soft)}
+  .ex h2{font-size:19px;margin:0;line-height:1.2}
+  .ex .alt{font-size:13px;color:var(--muted);margin-top:2px}
+  .target{
+    display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px;font-size:14px;font-weight:600;
+  }
+  .target span{background:var(--accent-soft);color:#1B33B8;border-radius:8px;padding:4px 9px}
+  .ex.complete .target span{background:#fff;color:var(--done)}
+
+  .row{display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+  .plate{
+    width:52px;height:52px;border-radius:50%;border:3px solid var(--ink);
+    font-weight:800;font-size:19px;background:#fff;
+    transition:background .12s,color .12s,transform .08s;
+  }
+  .plate:active{transform:scale(.92)}
+  .plate[aria-pressed="true"]{background:var(--done);border-color:var(--done);color:#fff}
+  .field{position:relative}
+  .field input{
+    width:100%;height:52px;border:2px solid var(--line);border-radius:12px;
+    padding:14px 34px 0 12px;font-size:20px;font-weight:700;background:#fff;color:var(--ink);
+  }
+  .field label{
+    position:absolute;left:12px;top:6px;font-size:11px;color:var(--muted);pointer-events:none;
+  }
+  .field .unit{position:absolute;right:10px;bottom:9px;font-size:13px;color:var(--muted);pointer-events:none}
+  .row.done .field input{border-color:#9FD8BC;background:#F3FBF7}
+  .row.noweight{grid-template-columns:52px 1fr}
+
+  .cue{margin-top:6px}
+  .cue summary{font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;padding:6px 0}
+  .cue p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+  .cue b{color:var(--ink)}
+
+  .finish{
+    width:100%;padding:18px;border-radius:14px;background:var(--ink);color:#fff;
+    font-weight:800;font-size:17px;margin:6px 0 10px;
+  }
+  .reset{width:100%;padding:12px;color:var(--muted);font-size:14px;text-decoration:underline}
+  .toast{
+    position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-20px);
+    background:var(--done);color:#fff;padding:10px 16px;border-radius:99px;font-weight:700;font-size:14px;
+    opacity:0;pointer-events:none;transition:.25s;z-index:20;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .timer{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--ink);color:#fff;
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+    display:flex;align-items:center;gap:10px;
+    transform:translateY(110%);transition:transform .2s;
+  }
+  .timer.on{transform:none}
+  .timer .time{font-size:38px;font-weight:800;min-width:110px;letter-spacing:-.02em}
+  .timer .lbl{font-size:12px;color:#AEB6C6;display:block;font-weight:500;letter-spacing:0}
+  .timer .grow{flex:1}
+  .timer button{
+    background:#2E3648;border-radius:10px;padding:12px 14px;font-weight:700;font-size:15px;min-height:48px;
+  }
+  .timer.ready{background:var(--done)}
+  .timer.ready .lbl{color:#D3F2E3}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tabs" role="tablist" id="tabs"></div>
+</header>
+
+<main id="app"></main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<div class="timer" id="timer" aria-live="polite">
+  <div>
+    <span class="lbl" id="timerLbl">Rest</span>
+    <div class="time" id="timerTime">0:00</div>
+  </div>
+  <div class="grow"></div>
+  <button id="timerAdd">+15s</button>
+  <button id="timerSkip">Skip</button>
+</div>
+
+<script>
+const DAYS = [
+  {id:'upperA', tab:'Tue', name:'Upper A', sub:'Horizontal push/pull',
+   goal:'Build chest width and upper back thickness while keeping the shoulders healthy.',
+   warm:['5 min easy cardio','Arm circles and band pull-aparts, 20 reps','1-2 light ramp-up sets of your first lift'],
+   ex:[
+    {id:'bench', name:'Flat dumbbell bench press', alt:'or chest press machine', sets:3, reps:'10-12', rest:120,
+     tempo:'3 sec down, 1 sec explode', why:'Dumbbells load each arm on its own, which fixes strength imbalances early.'},
+    {id:'oarow', name:'One-arm dumbbell row', alt:'flat bench, one hand and same-side knee on it', sets:3, reps:'10-12 per arm', rest:120,
+     tempo:'1 sec pull, 2 sec squeeze, 3 sec lower', why:'Works the lats and upper back one side at a time. Keep your back flat and pull your elbow toward your hip.'},
+    {id:'chestfly', name:'Dumbbell chest fly', alt:'flat bench', sets:3, reps:'12-15', rest:90,
+     tempo:'2 sec lower, 1 sec squeeze', why:'Stretches and squeezes the chest, like the pec deck. Keep a slight bend in your elbows and go light.'},
+    {id:'revfly', name:'Bent-over reverse fly', alt:'dumbbells, hinge forward with a flat back', sets:3, reps:'12-15', rest:60,
+     tempo:'Lead with your elbows, 1 sec squeeze', why:'Works the rear delts and upper back, like the reverse pec deck. Use very light weights.'},
+    {id:'pushdown', name:'Rope triceps pushdown', alt:'cable or dumbbell', sets:3, reps:'12-15', rest:60,
+     tempo:'Smooth, full lockout', why:'Direct triceps finisher.'}
+   ]},
+  {id:'lowerA', tab:'Wed', name:'Lower A', sub:'Quads and knees',
+   goal:'Build quad size, balance it with the hamstrings, and train single-leg stability and core.',
+   warm:['5 min bike or incline walk','10 bodyweight squats and 10 glute bridges','1-2 light ramp-up sets on the leg press'],
+   ex:[
+    {id:'legpress', name:'Leg press', alt:'or dumbbell goblet squat', sets:3, reps:'10-12', rest:120,
+     tempo:'3 sec lowering, no knee lockout at top', why:'High quad stimulation without loading the spine. Push through the whole foot.'},
+    {id:'legcurl', name:'Seated or lying leg curl', alt:'', sets:3, reps:'10-12', rest:90,
+     tempo:'2 sec squeeze, 3 sec return', why:'Isolates the hamstrings and protects the knees before single-leg work.'},
+    {id:'bulgarian', name:'Bulgarian split squat', alt:'or step-ups', sets:3, reps:'8-10 per leg', rest:90,
+     tempo:'Controlled 2 sec down', why:'Single-leg stability and hip development.'},
+    {id:'kneeraise', name:'Hanging knee raise', alt:'or cable crunch', sets:3, reps:'12-15', rest:60,
+     tempo:'No swinging', why:'Core finisher.'}
+   ]},
+  {id:'upperB', tab:'Fri', name:'Upper B', sub:'Vertical pull and shoulders',
+   goal:'Build lat width, overhead pressing strength, side delts, and biceps.',
+   warm:['5 min easy cardio','Band pull-aparts and shoulder dislocates, 15 reps','1-2 light ramp-up sets of pulldowns'],
+   ex:[
+    {id:'pulldown', name:'Lat pulldown', alt:'or assisted pull-ups', sets:3, reps:'10-12', rest:120,
+     tempo:'Pull shoulders down first, then elbows to chest', why:'Primary lat movement. Builds vertical pulling strength cleanly.'},
+    {id:'ohp', name:'Seated dumbbell shoulder press', alt:'or Smith machine press', sets:3, reps:'10-12', rest:120,
+     tempo:'3 sec lower to chin level, then explode up', why:'Pairs well after pulldowns with no lat crossover fatigue.'},
+    {id:'lateral', name:'Lateral raise', alt:'machine or dumbbell', sets:3, reps:'12-15', rest:60,
+     tempo:'2 sec lift, 3 sec lower', why:'Machine keeps tension on the side delts through the whole range.'},
+    {id:'curl', name:'Incline dumbbell curl', alt:'', sets:3, reps:'10-12', rest:60,
+     tempo:'Full stretch at the bottom', why:'Biceps finisher.'}
+   ]},
+  {id:'lowerB', tab:'Sat', name:'Lower B', sub:'Glutes and posterior chain',
+   goal:'Build glute and hamstring strength, low-back resilience, and core stability.',
+   warm:['5 min bike or incline walk','10 hip hinges with no weight and 10 glute bridges','1-2 light ramp-up sets of RDLs'],
+   ex:[
+    {id:'rdl', name:'Dumbbell Romanian deadlift', alt:'', sets:3, reps:'10-12', rest:120,
+     tempo:'3 sec hinge down, drive hips forward', why:'High-yield hamstring and glute hinge without heavy barbell stress on the lower back.'},
+    {id:'thrust', name:'Dumbbell hip thrust', alt:'or hip thrust machine', sets:3, reps:'10-12', rest:90,
+     tempo:'2 sec pause and squeeze at the top', why:'Direct glute overload.'},
+    {id:'backext', name:'Back extension', alt:'', sets:3, reps:'12-15', rest:60,
+     tempo:'Slow and controlled', why:'Builds lower-back resilience and posterior chain endurance safely.'},
+    {id:'plank', name:'Plank', alt:'', sets:3, reps:'45-60 sec', rest:60, noWeight:true,
+     tempo:'Ribs down, squeeze glutes', why:'Core finisher. Log seconds in the reps box.'}
+   ]}
+];
+
+/* ---------- state ---------- */
+const KEY = 'wk-tracker-v1';
+let data = { sessions:{}, last:{}, done:{} };   // done: count of finished workouts per day
+let dayIdx = 0;
+let saveTimer = null;
+
+async function load(){
+  try{
+    let raw = null;
+    if(window.storage){ const r = await window.storage.get(KEY); raw = r && r.value; }
+    else raw = localStorage.getItem(KEY);
+    if(raw) data = Object.assign(data, JSON.parse(raw));
+  }catch(e){ /* first run: keep defaults */ }
+}
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async()=>{
+    try{
+      const str = JSON.stringify(data);
+      if(window.storage) await window.storage.set(KEY, str);
+      else localStorage.setItem(KEY, str);
+    }catch(e){}
+  }, 250);
+}
+function sess(day){
+  if(!data.sessions[day.id]) data.sessions[day.id] = {};
+  const s = data.sessions[day.id];
+  day.ex.forEach(ex=>{
+    if(!s[ex.id]) s[ex.id] = Array.from({length:ex.sets},()=>({w:'',r:'',d:false}));
+  });
+  return s;
+}
+function todayIndex(){
+  const map = {0:0, 1:0, 2:0, 3:1, 4:2, 5:2, 6:3}; // Thu -> Fri, Sun/Mon -> Tue
+  return map[new Date().getDay()];
+}
+
+/* ---------- render ---------- */
+const $ = s => document.querySelector(s);
+
+function renderTabs(){
+  $('#tabs').innerHTML = DAYS.map((d,i)=>
+    `<button class="tab" role="tab" aria-selected="${i===dayIdx}" data-i="${i}">${d.tab}<small>${d.name}</small></button>`
+  ).join('');
+}
+
+function renderDay(){
+  const day = DAYS[dayIdx], s = sess(day);
+  const total = day.ex.reduce((n,e)=>n+e.sets,0);
+  const doneN = day.ex.reduce((n,e)=>n+s[e.id].filter(x=>x.d).length,0);
+  const finished = data.done[day.id] || 0;
+
+  let html = `
+  <section class="hero">
+    <h1>${day.name}: ${day.sub}</h1>
+    <p>${day.goal}</p>
+  </section>
+  <div class="progress" aria-hidden="true"><i id="bar" style="width:${doneN/total*100}%"></i></div>
+  <div class="progress-label"><span id="cnt">${doneN} of ${total} sets</span><span>${finished} finished so far</span></div>
+
+  <details class="warm">
+    <summary>Warm-up, about 8 minutes</summary>
+    <ul>${day.warm.map(w=>`<li>${w}</li>`).join('')}</ul>
+  </details>`;
+
+  day.ex.forEach((ex,ei)=>{
+    const rows = s[ex.id];
+    const last = data.last[ex.id] || [];
+    const all = rows.every(r=>r.d);
+    html += `
+    <article class="ex ${all?'complete':''}" data-ex="${ex.id}">
+      <h2>${ei+1}. ${ex.name}</h2>
+      ${ex.alt?`<div class="alt">${ex.alt}</div>`:''}
+      <div class="target"><span>${ex.sets} sets</span><span>${ex.reps} reps</span><span>Rest ${fmt(ex.rest)}</span></div>
+      ${rows.map((r,si)=>{
+        const lw = last[si] ? last[si].w : '', lr = last[si] ? last[si].r : '';
+        return `
+        <div class="row ${r.d?'done':''} ${ex.noWeight?'noweight':''}">
+          <button class="plate" aria-pressed="${r.d}" aria-label="Set ${si+1} done" data-ex="${ex.id}" data-set="${si}">${si+1}</button>
+          ${ex.noWeight?'':`<div class="field"><label>Weight</label>
+            <input inputmode="decimal" type="text" placeholder="${lw||'0'}" value="${r.w}" data-ex="${ex.id}" data-set="${si}" data-k="w"><span class="unit">lb</span></div>`}
+          <div class="field"><label>${ex.noWeight?'Seconds':'Reps'}</label>
+            <input inputmode="numeric" type="text" placeholder="${lr||'0'}" value="${r.r}" data-ex="${ex.id}" data-set="${si}" data-k="r"></div>
+        </div>`;
+      }).join('')}
+      <details class="cue">
+        <summary>Form cue and tempo</summary>
+        <p><b>Tempo:</b> ${ex.tempo}</p>
+        <p><b>Why:</b> ${ex.why}</p>
+      </details>
+    </article>`;
+  });
+
+  html += `
+  <button class="finish" id="finish">Finish workout and save weights</button>
+  <button class="reset" id="clear">Clear this day's checkmarks</button>`;
+  $('#app').innerHTML = html;
+}
+
+function updateProgress(){
+  const day = DAYS[dayIdx], s = sess(day);
+  const total = day.ex.reduce((n,e)=>n+e.sets,0);
+  const doneN = day.ex.reduce((n,e)=>n+s[e.id].filter(x=>x.d).length,0);
+  $('#bar').style.width = (doneN/total*100)+'%';
+  $('#cnt').textContent = `${doneN} of ${total} sets`;
+}
+
+function fmt(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${String(s).padStart(2,'0')}`; }
+
+/* ---------- interactions ---------- */
+$('#tabs').addEventListener('click', e=>{
+  const b = e.target.closest('.tab'); if(!b) return;
+  dayIdx = +b.dataset.i; renderTabs(); renderDay(); window.scrollTo(0,0);
+});
+
+$('#app').addEventListener('input', e=>{
+  const i = e.target; if(!i.dataset.k) return;
+  const day = DAYS[dayIdx];
+  sess(day)[i.dataset.ex][+i.dataset.set][i.dataset.k] = i.value;
+  save();
+});
+
+$('#app').addEventListener('click', e=>{
+  const day = DAYS[dayIdx], s = sess(day);
+  const p = e.target.closest('.plate');
+  if(p){
+    const ex = day.ex.find(x=>x.id===p.dataset.ex);
+    const row = s[ex.id][+p.dataset.set];
+    row.d = !row.d;
+    if(row.d){
+      // carry last-session numbers if the boxes were left empty
+      const last = (data.last[ex.id]||[])[+p.dataset.set];
+      if(last){ if(!row.w && !ex.noWeight) row.w = last.w; if(!row.r) row.r = last.r; }
+      startTimer(ex.rest);
+    }
+    save();
+    // update just this card to keep scroll position
+    const scrollY = window.scrollY;
+    renderDay(); window.scrollTo(0, scrollY);
+    return;
+  }
+  if(e.target.id==='finish'){
+    day.ex.forEach(ex=>{
+      const rows = s[ex.id];
+      if(rows.some(r=>r.w||r.r)) data.last[ex.id] = rows.map(r=>({w:r.w,r:r.r}));
+    });
+    data.done[day.id] = (data.done[day.id]||0) + 1;
+    data.sessions[day.id] = {};
+    save(); stopTimer(); renderDay(); window.scrollTo(0,0);
+    toast('Workout saved. Nice work.');
+  }
+  if(e.target.id==='clear'){
+    data.sessions[day.id] = {}; save(); stopTimer(); renderDay();
+  }
+});
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------- rest timer ---------- */
+let endAt = 0, tick = null, audioCtx = null;
+
+function startTimer(sec){
+  endAt = Date.now() + sec*1000;
+  $('#timer').classList.add('on'); $('#timer').classList.remove('ready');
+  $('#timerLbl').textContent = 'Rest';
+  clearInterval(tick); tick = setInterval(update, 250); update();
+}
+function update(){
+  const left = Math.ceil((endAt - Date.now())/1000);
+  if(left > 0){ $('#timerTime').textContent = fmt(left); return; }
+  clearInterval(tick);
+  $('#timerTime').textContent = 'Go';
+  $('#timerLbl').textContent = 'Rest over, next set';
+  $('#timer').classList.add('ready');
+  beep();
+  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+}
+function stopTimer(){ clearInterval(tick); $('#timer').classList.remove('on','ready'); }
+function beep(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = 880; g.gain.value = 0.15;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.35);
+  }catch(e){}
+}
+$('#timerAdd').onclick = ()=>{
+  if($('#timer').classList.contains('ready')){ startTimer(15); return; }
+  endAt += 15000; update();
+};
+$('#timerSkip').onclick = stopTimer;
+
+/* ---------- boot ---------- */
+(async function(){
+  await load();
+  dayIdx = todayIndex();
+  renderTabs(); renderDay();
+})();
+</script>
+</body>
+</html>
